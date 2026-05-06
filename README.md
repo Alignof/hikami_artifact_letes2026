@@ -28,7 +28,30 @@ To build everything (Hypervisor, Evaluation Binaries, U-Boot, and OpenSBI):
 cargo make build-all
 ```
 
-### 1. Building the Hypervisor & Evaluation Binaries
+### 1. Guest Image Preparation
+
+The Hikami hypervisor embeds guest images (kernel, initrd, and device trees) into its binary. You must prepare these files before building the hypervisor.
+
+#### Guest Kernel (Rockos Kernel)
+
+- **Source**: [rockos-riscv/rockos-kernel (v6.6.87)](https://github.com/rockos-riscv/rockos-kernel/releases/tag/rockos-v6.6.87)
+- This kernel is used to verify OS compatibility and run baseline benchmarks. Build it and place the resulting `vmlinux` in the appropriate directory if you wish to run a full Linux guest.
+
+#### Initrd
+
+The hypervisor requires an `initrd` to be present at `hikami/guest_image/initrd`.
+
+1. Download the official Milk-V Megrez system image.
+2. Mount the image and extract the `initrd` file (e.g., `initrd.img-6.6.87-win2030`).
+3. Place or symlink this file to `hikami/guest_image/initrd`.
+
+#### Evaluation Binaries
+
+Specialized bare-metal evaluation binaries for measuring emulation overhead are automatically built and linked by our script.
+
+### 2. Building the Hypervisor
+
+Once the guest images are prepared:
 
 ```bash
 cargo make build-hikami
@@ -37,12 +60,12 @@ cargo make build-hikami
 This command:
 
 1. Builds `emulation_overhead` binaries for QEMU and Megrez targets.
-2. Links them to `hikami/guest_image/`.
-3. Compiles the `hikami` hypervisor.
+2. Links them to `hikami/guest_image/megrez/emulation_eval` and `hikami/guest_image/qemu/emulation_eval`.
+3. Compiles the `hikami` hypervisor, embedding the prepared images.
 
 **Output Binary**: `hikami/target/riscv64imac-unknown-none-elf/release/hikami`
 
-### 2. Building Bootloaders (OpenSBI & U-Boot)
+### 3. Building Bootloaders (OpenSBI & U-Boot)
 
 ```bash
 cargo make build-bootloaders
@@ -69,33 +92,16 @@ Flash the downloaded image to an SD card (e.g., using `dd` or BalenaEtcher).
 
 ### 2. Write Artifacts to the SD Card
 
-After flashing the base image, you need to replace the bootloader and add the hypervisor.
-
-Assuming your SD card is identified as `/dev/sdX`:
-
-#### Write the Bootloader (Partition 1)
-
-Mount the first partition (FAT32) and copy the signed bootloader:
+Replace the bootloader and add the hypervisor to the first partition (FAT32) of your SD card (e.g., `/dev/sdX1`).
 
 ```bash
 sudo mount /dev/sdX1 /mnt
+# Update the bootloader
 sudo cp rockos-opensbi/sign/preload/bootloader_secboot_ddr5.bin /mnt/
-sudo umount /mnt
-```
-
-#### Write the Hypervisor (Partition 1)
-
-Copy the built `hikami` binary (as `hikami.elf`) to the same partition. U-Boot is configured to load this file:
-
-```bash
-sudo mount /dev/sdX1 /mnt
+# Add the hypervisor
 sudo cp hikami/target/riscv64imac-unknown-none-elf/release/hikami /mnt/hikami.elf
 sudo umount /mnt
 ```
-
-#### (Optional) Write the Guest Kernel (Rockos Kernel)
-
-If you wish to run the full Rockos Linux guest, build the [Rockos Kernel (v6.6.87)](https://github.com/rockos-riscv/rockos-kernel/releases/tag/rockos-v6.6.87) and place its `vmlinux` in the boot partition or rootfs as required by your guest configuration.
 
 ---
 
@@ -103,12 +109,12 @@ If you wish to run the full Rockos Linux guest, build the [Rockos Kernel (v6.6.8
 
 ### Reproduction of Results
 
-The hypervisor built with `cargo make build-hikami` has the emulation benchmarks already embedded. When you boot the Milk-V Megrez with this hypervisor, it will automatically execute the embedded benchmarks.
+The hypervisor built with `cargo make build-hikami` has the emulation benchmarks already embedded.
 
 1. Insert the prepared SD card into the Milk-V Megrez.
 2. Connect to the serial console (115200 baud).
 3. Power on the device.
-4. The hypervisor will boot, start the guest, and output the benchmark results to the console.
+4. The hypervisor will boot, start the guest, and output the benchmark results (latency measurement, etc.) to the console.
 
 ---
 
