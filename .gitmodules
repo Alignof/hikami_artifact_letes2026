@@ -6,3 +6,7 @@
 	path = rockos-u-boot
 	url = https://github.com/Alignof/rockos-u-boot
 	branch = feature/hikami
+[submodule "rockos-opensbi"]
+	path = rockos-opensbi
+	url = https://github.com/Alignof/rockos-opensbi
+	branch = feature/hikami
