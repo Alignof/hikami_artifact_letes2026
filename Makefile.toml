@@ -1,0 +1,40 @@
+[tasks.default]
+alias = "build-hikami"
+
+[tasks.build-emulation-binaries]
+description = "Build emulation evaluation binaries for both qemu and megrez"
+script = [
+    "nix develop ./evaluation --command bash -c 'cd evaluation/emulation_overhead && cargo make build_megrez && cargo make build_qemu'"
+]
+
+[tasks.link-guest-images]
+description = "Link built emulation binaries to hikami guest image directory"
+dependencies = ["build-emulation-binaries"]
+script = [
+    "mkdir -p hikami/guest_image/megrez",
+    "mkdir -p hikami/guest_image/qemu",
+    "ln -sf ../../../evaluation/emulation_overhead/target/riscv64imac-unknown-none-elf/release/emulation_overhead hikami/guest_image/megrez/emulation_eval",
+    "ln -sf ../../../evaluation/emulation_overhead/target/riscv64imac-unknown-none-elf/release/emulation_overhead hikami/guest_image/qemu/emulation_eval"
+]
+
+[tasks.build-hikami]
+description = "Build the Hikami hypervisor"
+dependencies = ["link-guest-images"]
+script = [
+    "nix develop ./hikami --command cargo make build-hikami-internal"
+]
+
+[tasks.build-hikami-internal]
+description = "Internal task to run cargo build for hikami"
+command = "cargo"
+args = ["build", "--release", "--features", "identity_map"]
+cwd = "hikami"
+
+[tasks.clean]
+description = "Clean built binaries and linked images"
+script = [
+    "rm -rf evaluation/emulation_overhead/target",
+    "rm -f hikami/guest_image/megrez/emulation_eval",
+    "rm -f hikami/guest_image/qemu/emulation_eval",
+    "cd hikami && cargo clean"
+]
