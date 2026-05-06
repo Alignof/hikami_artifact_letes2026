@@ -57,12 +57,6 @@ Once the guest images are prepared:
 cargo make build-hikami
 ```
 
-This command:
-
-1. Builds `emulation_overhead` binaries for QEMU and Megrez targets.
-2. Links them to `hikami/guest_image/megrez/emulation_eval` and `hikami/guest_image/qemu/emulation_eval`.
-3. Compiles the `hikami` hypervisor, embedding the prepared images.
-
 **Output Binary**: `hikami/target/riscv64imac-unknown-none-elf/release/hikami`
 
 ### 3. Building Bootloaders (OpenSBI & U-Boot)
@@ -70,12 +64,6 @@ This command:
 ```bash
 cargo make build-bootloaders
 ```
-
-This command:
-
-1. Builds U-Boot for the Milk-V Megrez.
-2. Builds OpenSBI using U-Boot as a payload.
-3. Signs the resulting binary using `nsign`.
 
 **Output Binary**: `rockos-opensbi/sign/preload/bootloader_secboot_ddr5.bin`
 
@@ -90,18 +78,23 @@ Download the base system image for Milk-V Megrez from the official releases:
 
 Flash the downloaded image to an SD card (e.g., using `dd` or BalenaEtcher).
 
-### 2. Write Artifacts to the SD Card
+### 2. Install Artifacts to the SD Card
 
-Replace the bootloader and add the hypervisor to the first partition (FAT32) of your SD card (e.g., `/dev/sdX1`).
+You can use the `install` task to copy the built bootloader and hypervisor to the SD card.
+
+Set the `DEVICE` environment variable to your SD card device (e.g., `/dev/sdX`). The script will mount the first partition (`${DEVICE}1`) and copy the artifacts.
 
 ```bash
-sudo mount /dev/sdX1 /mnt
-# Update the bootloader
-sudo cp rockos-opensbi/sign/preload/bootloader_secboot_ddr5.bin /mnt/
-# Add the hypervisor
-sudo cp hikami/target/riscv64imac-unknown-none-elf/release/hikami /mnt/hikami.elf
-sudo umount /mnt
+# Example: If your SD card is /dev/sdb
+DEVICE=/dev/sdb cargo make install
 ```
+
+This command will:
+
+1. Mount `${DEVICE}1` to `/mnt`.
+2. Copy the signed bootloader (`bootloader_secboot_ddr5.bin`).
+3. Copy the hypervisor as `hikami.elf`.
+4. Unmount the partition.
 
 ---
 
