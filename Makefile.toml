@@ -1,5 +1,9 @@
 [tasks.default]
-alias = "build-hikami"
+alias = "build-all"
+
+[tasks.build-all]
+description = "Build everything: hypervisor, evaluation binaries, and bootloaders"
+dependencies = ["build-hikami", "build-bootloaders"]
 
 [tasks.build-emulation-binaries]
 description = "Build emulation evaluation binaries for both qemu and megrez"
@@ -30,11 +34,32 @@ command = "cargo"
 args = ["build", "--release", "--features", "identity_map"]
 cwd = "hikami"
 
+[tasks.build-u-boot]
+description = "Build U-Boot for Megrez"
+script = [
+    "nix develop ./rockos-u-boot --command bash -c 'cd rockos-u-boot && cargo make install'"
+]
+
+[tasks.build-opensbi]
+description = "Build and sign OpenSBI with U-Boot payload"
+dependencies = ["build-u-boot"]
+script = [
+    "nix develop ./rockos-opensbi --command bash -c 'cd rockos-opensbi && cargo make sign'"
+]
+
+[tasks.build-bootloaders]
+description = "Alias for building both U-Boot and OpenSBI"
+alias = "build-opensbi"
+
 [tasks.clean]
-description = "Clean built binaries and linked images"
+description = "Clean all built binaries"
 script = [
     "rm -rf evaluation/emulation_overhead/target",
     "rm -f hikami/guest_image/megrez/emulation_eval",
     "rm -f hikami/guest_image/qemu/emulation_eval",
-    "cd hikami && cargo clean"
+    "cd hikami && cargo clean",
+    "cd rockos-u-boot && make clean",
+    "cd rockos-opensbi && make clean",
+    "rm -f rockos-opensbi/u-boot.bin rockos-opensbi/u-boot.dtb",
+    "rm -f rockos-opensbi/sign/preload/fw_payload.bin rockos-opensbi/sign/preload/bootloader_secboot_ddr5.bin"
 ]
