@@ -44,10 +44,22 @@ dependencies = ["build-u-boot"]
 script = [
   "nix develop ./rockos-opensbi --command bash -c 'cd rockos-opensbi && cargo make sign'",
 ]
-
 [tasks.build-bootloaders]
 description = "Alias for building both U-Boot and OpenSBI"
 alias = "build-opensbi"
+
+[tasks.install]
+description = "Install built artifacts (bootloader and hypervisor) to SD card"
+dependencies = ["build-all"]
+script = [
+  "echo \"Installing to ${DEVICE}1...\"",
+  "sudo mount ${DEVICE}1 /mnt",
+  "sudo cp rockos-opensbi/sign/preload/bootloader_secboot_ddr5.bin /mnt/",
+  "sudo cp hikami/target/riscv64imac-unknown-none-elf/release/hikami /mnt/hikami.elf",
+  "ls -l /mnt/",
+  "sudo umount /mnt",
+  "echo \"Installation complete.\"",
+]
 
 [tasks.clean]
 description = "Clean all built binaries"
