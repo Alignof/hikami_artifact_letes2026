@@ -10,3 +10,7 @@
 	path = rockos-opensbi
 	url = https://github.com/Alignof/rockos-opensbi
 	branch = feature/hikami
+[submodule "hikami_zbs"]
+	path = hikami_zbs
+	url = https://github.com/Alignof/hikami_zbs
+	branch = develop
