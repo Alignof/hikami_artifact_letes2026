@@ -8,25 +8,23 @@ dependencies = ["build-hikami", "build-bootloaders"]
 [tasks.build-emulation-binaries]
 description = "Build emulation evaluation binaries for both qemu and megrez"
 script = [
-    "nix develop ./evaluation --command bash -c 'cd evaluation/emulation_overhead && cargo make build_megrez && cargo make build_qemu'"
+  "nix develop ./evaluation --command bash -c 'cd evaluation/emulation_overhead && cargo make build_megrez && cargo make build_qemu'",
 ]
 
 [tasks.link-guest-images]
 description = "Link built emulation binaries to hikami guest image directory"
 dependencies = ["build-emulation-binaries"]
 script = [
-    "mkdir -p hikami/guest_image/megrez",
-    "mkdir -p hikami/guest_image/qemu",
-    "ln -sf ../../../evaluation/emulation_overhead/target/riscv64imac-unknown-none-elf/release/emulation_overhead hikami/guest_image/megrez/emulation_eval",
-    "ln -sf ../../../evaluation/emulation_overhead/target/riscv64imac-unknown-none-elf/release/emulation_overhead hikami/guest_image/qemu/emulation_eval"
+  "mkdir -p hikami/guest_image/megrez",
+  "mkdir -p hikami/guest_image/qemu",
+  "ln -sf ../../../evaluation/emulation_overhead/target/riscv64imac-unknown-none-elf/release/emulation_overhead hikami/guest_image/megrez/emulation_eval",
+  "ln -sf ../../../evaluation/emulation_overhead/target/riscv64imac-unknown-none-elf/release/emulation_overhead hikami/guest_image/qemu/emulation_eval",
 ]
 
 [tasks.build-hikami]
 description = "Build the Hikami hypervisor"
 dependencies = ["link-guest-images"]
-script = [
-    "nix develop ./hikami --command cargo make build-hikami-internal"
-]
+script = ["nix develop ./hikami --command cargo make build-hikami-internal"]
 
 [tasks.build-hikami-internal]
 description = "Internal task to run cargo build for hikami"
@@ -37,14 +35,14 @@ cwd = "hikami"
 [tasks.build-u-boot]
 description = "Build U-Boot for Megrez"
 script = [
-    "nix develop ./rockos-u-boot --command bash -c 'cd rockos-u-boot && cargo make install'"
+  "nix develop ./rockos-u-boot --command bash -c 'cd rockos-u-boot && cargo make install'",
 ]
 
 [tasks.build-opensbi]
 description = "Build and sign OpenSBI with U-Boot payload"
 dependencies = ["build-u-boot"]
 script = [
-    "nix develop ./rockos-opensbi --command bash -c 'cd rockos-opensbi && cargo make sign'"
+  "nix develop ./rockos-opensbi --command bash -c 'cd rockos-opensbi && cargo make sign'",
 ]
 
 [tasks.build-bootloaders]
@@ -54,12 +52,13 @@ alias = "build-opensbi"
 [tasks.clean]
 description = "Clean all built binaries"
 script = [
-    "rm -rf evaluation/emulation_overhead/target",
-    "rm -f hikami/guest_image/megrez/emulation_eval",
-    "rm -f hikami/guest_image/qemu/emulation_eval",
-    "cd hikami && cargo clean",
-    "cd rockos-u-boot && make clean",
-    "cd rockos-opensbi && make clean",
-    "rm -f rockos-opensbi/u-boot.bin rockos-opensbi/u-boot.dtb",
-    "rm -f rockos-opensbi/sign/preload/fw_payload.bin rockos-opensbi/sign/preload/bootloader_secboot_ddr5.bin"
+  "rm -rf evaluation/emulation_overhead/target",
+  "rm -f hikami/guest_image/megrez/emulation_eval",
+  "rm -f hikami/guest_image/qemu/emulation_eval",
+  "rm -f hikami/guest_image/initrd",
+  "cd hikami && cargo clean",
+  "cd rockos-u-boot && make clean",
+  "cd rockos-opensbi && make clean",
+  "rm -f rockos-opensbi/u-boot.bin rockos-opensbi/u-boot.dtb",
+  "rm -f rockos-opensbi/sign/preload/fw_payload.bin rockos-opensbi/sign/preload/bootloader_secboot_ddr5.bin",
 ]
