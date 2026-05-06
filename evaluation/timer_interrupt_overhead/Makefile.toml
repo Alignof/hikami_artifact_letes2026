@@ -1,0 +1,39 @@
+# Makefile.toml for timer_interrupt_overhead
+
+[tasks.default]
+alias = "build"
+
+[tasks.build]
+description = "Build timer interrupt latency evaluation binary"
+command = "cargo"
+args = ["build", "--release"]
+
+[tasks.qemu]
+description = "Run on QEMU (for debug)"
+command = "qemu-system-riscv64"
+args = [
+  "-machine",
+  "virt",
+  "-cpu",
+  "rv64",
+  "-m",
+  "4G",
+  "-nographic",
+  "-bios",
+  "default",
+  "-kernel",
+  "target/riscv64gc-unknown-none-elf/release/timer_interrupt_overhead",
+]
+dependencies = ["build"]
+
+[tasks.install]
+description = "Install evaluation binary file for hardware testing (Environment specific)"
+script = [
+  '''
+  # Example: sudo mount /dev/sda3 /mnt &&
+  #   sudo cp target/riscv64gc-unknown-none-elf/release/timer_interrupt_overhead /mnt/home/debian/timer_interrupt_overhead &&
+  #   sudo umount /mnt
+  echo "Please customize the install task for your hardware environment."
+''',
+]
+dependencies = ["build"]

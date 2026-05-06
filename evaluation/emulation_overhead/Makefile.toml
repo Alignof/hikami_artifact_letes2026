@@ -1,0 +1,116 @@
+# Makefile.toml
+
+[tasks.default]
+# Make the 'build' task the default when running just 'cargo make'.
+alias = "build_qemu"
+
+[tasks.build_megrez]
+description = "Build evaluation binary file for megrez"
+command = "cargo"
+args = ["build", "--release", "--no-default-features", "--features", "megrez"]
+
+[tasks.build_qemu]
+description = "Build evaluation binary file for megrez"
+command = "cargo"
+args = ["build", "--release", "--features", "qemu"]
+
+[tasks.install_qemu]
+description = "Install evaluation binary file for qemu to external drive to evaluate on other machine"
+script = [
+  '''
+  sudo mount /dev/sda3 /mnt &&
+  sudo cp ${CARGO_MAKE_CRATE_CUSTOM_TRIPLE_TARGET_DIRECTORY}/release/${CARGO_MAKE_PROJECT_NAME} /mnt/home/debian/emulation_overhead_qemu &&
+  sudo umount /mnt
+''',
+]
+dependencies = ["build_qemu"]
+
+[tasks.qemu]
+description = "Run the evaluation binary on QEMU on other machine"
+command = "qemu-system-riscv64"
+args = [
+  "-machine",
+  "virt",
+  "-cpu",
+  "rv64",
+  "-m",
+  "4G",
+  "-smp",
+  "1",
+  "-nographic",
+  "-bios",
+  "default",
+  "-kernel",
+  "${CARGO_MAKE_CRATE_CUSTOM_TRIPLE_TARGET_DIRECTORY}/release/${CARGO_MAKE_PROJECT_NAME}",
+]
+dependencies = ["build_qemu"]
+
+[tasks.qemu_log]
+description = "Run the evaluation binary on QEMU with tracing plugin"
+script = [
+  '''
+  TARGET_BIN=${CARGO_MAKE_CRATE_CUSTOM_TRIPLE_TARGET_DIRECTORY}/release/${CARGO_MAKE_PROJECT_NAME}
+  PLUGIN_PATH=../libtrace_pc.so
+
+  if [ ! -f "${PLUGIN_PATH}" ]; then
+    echo "Error: ${PLUGIN_PATH} not found. Please run 'cargo make libtrace' first."
+    exit 1
+  fi
+
+  TRIGGER_ADDR=0x$(riscv64-unknown-linux-musl-readelf -s ${TARGET_BIN} | rg 'begin_1pct' | awk '{print $2}' | sed 's/^0*//')
+  STOP_ADDR=0x$(riscv64-unknown-linux-musl-readelf -s ${TARGET_BIN} | rg 'end_001pct' | awk '{print $2}' | sed 's/^0*//')
+
+  echo "Detected Trigger: ${TRIGGER_ADDR}"
+  echo "Detected Stop: ${STOP_ADDR}"
+
+  qemu-system-riscv64 \
+    -machine virt \
+    -cpu rv64 \
+    -m 4G \
+    -smp 1 \
+    -nographic \
+    -plugin file=${PLUGIN_PATH},trigger=${TRIGGER_ADDR},stop=${STOP_ADDR} \
+    -d plugin \
+    -D qemu.log \
+    -bios default \
+    -kernel ${TARGET_BIN}
+  ''',
+]
+dependencies = ["build_qemu"]
+
+[tasks.show]
+description = "Find enterypoints of benchmark for debug"
+script = [
+  '''
+riscv64-unknown-linux-musl-readelf -s ${CARGO_MAKE_CRATE_CUSTOM_TRIPLE_TARGET_DIRECTORY}/release/${CARGO_MAKE_PROJECT_NAME} | rg 'pct'
+''',
+]
+
+[tasks.inspect]
+description = "Count number of enterypoints of benchmark for debug"
+script = [
+  '''
+riscv64-unknown-linux-musl-readelf -s ${CARGO_MAKE_CRATE_CUSTOM_TRIPLE_TARGET_DIRECTORY}/release/${CARGO_MAKE_PROJECT_NAME} | rg 'pct' | awk '{print $2}' | sed 's/^0*//' | xargs -I {} rg 0x{}: ./qemu.log
+''',
+]
+
+[tasks.libtrace]
+description = "Build QEMU TCG plugin"
+script = ['''
+   # If QEMU_INCLUDE_PATH is not set, try to find it or use a default
+   if [ -z "${QEMU_INCLUDE_PATH}" ]; then
+     # Check common locations or use pkg-config if available
+     QEMU_INCLUDE_PATH="/usr/local/include"
+     echo "QEMU_INCLUDE_PATH not set, using default: ${QEMU_INCLUDE_PATH}"
+   fi
+
+   gcc -shared -fPIC -I${QEMU_INCLUDE_PATH} \
+    $(pkg-config --cflags --libs glib-2.0) \
+    ../trace_pc.c -o ../libtrace_pc.so
+  ''']
+
+[tasks.show-path]
+description = "Show ${CARGO_MAKE_CRATE_CUSTOM_TRIPLE_TARGET_DIRECTORY} for debug"
+script = [
+  "echo Binary path is: ${CARGO_MAKE_CRATE_CUSTOM_TRIPLE_TARGET_DIRECTORY}",
+]
