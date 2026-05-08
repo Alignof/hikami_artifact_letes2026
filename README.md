@@ -17,6 +17,10 @@ This repository contains the artifacts for the paper "Hikami: A Lightweight Hype
 
 - [Nix](https://nixos.org/download.html) (with flake support enabled)
 - [cargo-make](https://github.com/sagiegurari/cargo-make)
+- [rustfmt](https://github.com/rust-lang/rustfmt) (for code verification)
+- [delta](https://github.com/dandavison/delta) (for code verification)
+
+> **Note**: For `ozora` and code generation, we recommend using the Nix shell provided in the `ozora` directory to ensure all dependencies (including `sail` and OCaml libraries) are correctly configured.
 
 ---
 
