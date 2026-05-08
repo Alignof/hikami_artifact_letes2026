@@ -10,6 +10,8 @@ This repository contains the artifacts for the paper "Hikami: A Lightweight Hype
 - `rockos-u-boot/`: Second-stage bootloader.
 - `rockos-opensbi/`: Third-stage bootloader (modified for Hikami).
 - `lctes26-paper45.pdf`: The accepted paper.
+- `ozora`: Tools for automatic generation of hypervisor modules from Sail specifications.
+- `sail-riscv`: Formal specification of the RISC-V ISA in Sail.
 
 ## Prerequisites
 
@@ -108,6 +110,29 @@ The hypervisor built with `cargo make build-hikami` has the emulation benchmarks
 2. Connect to the serial console (115200 baud).
 3. Power on the device.
 4. The hypervisor will boot, start the guest, and output the benchmark results (latency measurement, etc.) to the console.
+
+---
+
+## Extension Emulation Code Generation
+
+Hikami uses **Ozora** to automatically generate emulation code from formal RISC-V specifications written in Sail. This ensures the correctness of the emulation logic.
+
+To verify the code generation for the Zbs extension:
+
+1. Navigate to the `ozora` directory.
+2. Ensure you have the `sail` compiler and its dependencies installed (see `ozora/README.md` for details).
+3. Run the following command:
+
+```bash
+cd ozora
+cargo r riscv_insts_zbs.sail target/zbs.rs --ext-name Zbs
+```
+
+This command processes the Zbs specification (`riscv_insts_zbs.sail`) and generates the corresponding Rust code in `ozora/target/`. The generated structure is as follows:
+
+- `ozora/target/zbs.rs`: The core emulation module.
+- `ozora/target/instruction/zbs_extension.rs`: Instruction definitions used for the decoder.
+- `ozora/target/decode/zbs_extension.rs`: The implementation of the decoder itself.
 
 ---
 
