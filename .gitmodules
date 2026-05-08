@@ -14,3 +14,14 @@
 	path = hikami_zbs
 	url = https://github.com/Alignof/hikami_zbs
 	branch = develop
+[submodule "ozora"]
+	path = ozora
+	url = https://github.com/Alignof/ozora.git
+	branch = feature/zbs
+[submodule "sail-riscv"]
+	path = sail-riscv
+	url = https://github.com/riscv/sail-riscv.git
+[submodule "raki"]
+	path = raki
+	url = https://github.com/Alignof/raki.git
+	branch = feature/zbs
