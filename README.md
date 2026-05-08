@@ -134,6 +134,29 @@ This command processes the Zbs specification (`riscv_insts_zbs.sail`) and genera
 - `ozora/target/instruction/zbs_extension.rs`: Instruction definitions used for the decoder.
 - `ozora/target/decode/zbs_extension.rs`: The implementation of the decoder itself.
 
+### Verification of Generated Code
+
+To ensure the generated code is correct, you can compare it with the code currently used in Hikami and Raki. First, format the generated code to match the project's style:
+
+```bash
+rustfmt ozora/target/zbs.rs
+rustfmt ozora/target/instruction/zbs_extension.rs
+rustfmt ozora/target/decode/zbs_extension.rs
+```
+
+Then, use `delta` (or your preferred diff tool) to verify that the generated logic matches the manually integrated code:
+
+```bash
+# Compare emulation logic
+delta hikami_zbs/src/lib.rs ozora/target/zbs.rs
+
+# Compare decoder implementation
+delta raki/src/decode/zbs_extension.rs ozora/target/decode/zbs_extension.rs
+
+# Compare instruction definitions
+delta raki/src/instruction/zbs_extension.rs ozora/target/instruction/zbs_extension.rs
+```
+
 ---
 
 ## Cleaning the Workspace

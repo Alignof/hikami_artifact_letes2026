@@ -21,3 +21,7 @@
 [submodule "sail-riscv"]
 	path = sail-riscv
 	url = https://github.com/riscv/sail-riscv.git
+[submodule "raki"]
+	path = raki
+	url = https://github.com/Alignof/raki.git
+	branch = feature/zbs
