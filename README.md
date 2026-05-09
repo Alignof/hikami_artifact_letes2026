@@ -8,7 +8,7 @@ This artifact supports the paper: **"Hikami: A Lightweight Hypervisor for Emulat
 
 #### Hardware
 - **Milk-V Megrez**: This is the primary evaluation platform (RISC-V 64-bit with Hypervisor extension support).
-- **Serial Console**: USB-to-TTL cable (115200 baud) for interacting with the board.
+- **Serial Console**: USB-to-TTL cable or a Type-C to Type-A cable (115200 baud) for interacting with the board. You can use tools like `picocom` (e.g., `picocom -b 115200 /dev/ttyUSB0`).
 - **SD Card**: At least 8GB, used for booting the hypervisor and guest OS.
 
 #### Software
@@ -59,7 +59,16 @@ This experiment reproduces the performance results on the **Milk-V Megrez** hard
     - The hypervisor will boot and automatically start the embedded evaluation guest.
     - Observe the console output for "Ratio Average" and "Interrupt Latency" results.
 
-3.  **Expected Output:**
+3.  **Switching Evaluation Binaries:**
+    The hypervisor embeds the guest binary at compile-time. To switch between different evaluation binaries (e.g., for different experiments), you must modify `hikami/src/target_board/megrez.rs` and rebuild.
+    Example of switching to a specific binary:
+    ```rust
+    // In hikami/src/target_board/megrez.rs
+    pub static GUEST_KERNEL: [u8; include_bytes!("../../guest_image/megrez/emulation_eval").len()] =
+        *include_bytes!("../../guest_image/megrez/emulation_eval");
+    ```
+
+4.  **Expected Output:**
     - **Interrupt Latency**: Should be around 1.0 $\mu$s for timer and 0.5 $\mu$s for external interrupts.
     - **Emulation Overhead**: CoreMark scores should show Hikami at >99% of native performance.
 
@@ -125,7 +134,7 @@ If physical hardware (Milk-V Megrez) is not available, you can still verify the 
 ## 4. Claims NOT Supported by the Artifact
 
 - **Hardware-Specific Performance on Non-Megrez Platforms**: While the hypervisor is designed for RISC-V generally, the exact latency figures (0.5 $\mu$s - 1.0 $\mu$s) are specific to the EIC7700X SoC (Milk-V Megrez).
-- **IOMMU/AIA Support**: As noted in Section 5 (Conclusion), support for AIA and IOMMU is identified as future work and is not fully implemented in this version.
+- **IOMMU/AIA Support on Physical Hardware**: As noted in Section 5 (Conclusion), validation of AIA and IOMMU support on physical hardware is identified as future work, as the current target SoC (Milk-V Megrez) does not natively support these features.
 
 ---
 
