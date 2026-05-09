@@ -17,6 +17,8 @@ This artifact supports the paper: **"Hikami: A Lightweight Hypervisor for Emulat
   curl -L https://nixos.org/nix/install | sh
   ```
 - **Linux Host**: For building the artifacts and flashing the SD card.
+- **tokei**: For SLoC measurement (can be installed via `cargo install tokei` or your package manager).
+- **binutils**: `readelf` is required for binary analysis.
 
 ### Basic Test: Building the Hypervisor
 
@@ -43,7 +45,25 @@ To verify that the environment is set up correctly, build the entire project:
 
 ## 2. Step-by-Step Instructions
 
-### Experiment 1: Measuring Emulation and Interrupt Latency (Table 7, Table 8, Section 4.3.2)
+### Experiment 1: SLoC and Binary Size Measurement (Section 4.2, Table 5)
+
+This experiment verifies the resource efficiency of the hypervisor as described in the paper.
+
+1.  **Source Lines of Code (SLoC):**
+    Run `tokei` on the hypervisor components:
+    ```bash
+    tokei hikami hikami_zbs
+    ```
+    *Note: Table 5 reports ~7,000 lines of Rust code total (Core Library + Hypervisor Binary + Zbs Module).*
+
+2.  **Binary Size and Memory Footprint:**
+    Use `readelf` to inspect the built hypervisor binary:
+    ```bash
+    readelf -S hikami/target/riscv64imac-unknown-none-elf/release/hikami
+    ```
+    Observe the size of the `.text` section. As mentioned in Section 4.2, the `.text` section occupies approximately 84 KiB.
+
+### Experiment 2: Measuring Emulation and Interrupt Latency (Table 7, Table 8, Section 4.3.2)
 
 This experiment reproduces the performance results on the **Milk-V Megrez** hardware.
 
@@ -72,7 +92,16 @@ This experiment reproduces the performance results on the **Milk-V Megrez** hard
     - **Interrupt Latency**: Should be around 1.0 $\mu$s for timer and 0.5 $\mu$s for external interrupts.
     - **Emulation Overhead**: CoreMark scores should show Hikami at >99% of native performance.
 
-### Experiment 2: Extension Emulation Code Generation (Section 3.3, 4.6)
+### Experiment 3: Full Linux Boot (Table 6)
+
+1.  **Prepare Linux Image:**
+    Place the `vmlinux` and `initrd` in `hikami/guest_image/` as described in the root `README.md`.
+
+2.  **Build and Run:**
+    Rebuild the hypervisor with `cargo make build-hikami` and flash it.
+    The console will show the Linux boot process. Compare the timestamps with native boot (without the hypervisor).
+
+### Experiment 4: Extension Emulation Code Generation (Section 3.3, 4.6)
 
 This experiment verifies the **Ozora** auto-generation framework.
 
@@ -90,16 +119,7 @@ This experiment verifies the **Ozora** auto-generation framework.
     ```
     *Note: Minor formatting differences may exist; use `rustfmt` on both files for a cleaner comparison.*
 
-### Experiment 3: Full Linux Boot (Table 6)
-
-1.  **Prepare Linux Image:**
-    Place the `vmlinux` and `initrd` in `hikami/guest_image/` as described in the root `README.md`.
-
-2.  **Build and Run:**
-    Rebuild the hypervisor with `cargo make build-hikami` and flash it.
-    The console will show the Linux boot process. Compare the timestamps with native boot (without the hypervisor).
-
-### Experiment 4: QEMU Evaluation (Partial Reproduction)
+### Experiment 5: QEMU Evaluation (Partial Reproduction)
 
 If physical hardware (Milk-V Megrez) is not available, you can still verify the emulation logic and the hypervisor's core mechanisms using QEMU.
 
