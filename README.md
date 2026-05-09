@@ -7,11 +7,13 @@ This artifact supports the paper: **"Hikami: A Lightweight Hypervisor for Emulat
 ### Prerequisites
 
 #### Hardware
+
 - **Milk-V Megrez**: This is the primary evaluation platform (RISC-V 64-bit with Hypervisor extension support).
 - **Serial Console**: USB-to-TTL cable or a Type-C to Type-A cable (115200 baud) for interacting with the board. You can use tools like `picocom` (e.g., `picocom -b 115200 /dev/ttyUSB0`).
 - **SD Card**: At least 8GB, used for booting the hypervisor and guest OS.
 
 #### Software
+
 - **Nix**: Used for managing the build environment and dependencies.
   ```bash
   curl -L https://nixos.org/nix/install | sh
@@ -25,16 +27,19 @@ This artifact supports the paper: **"Hikami: A Lightweight Hypervisor for Emulat
 To verify that the environment is set up correctly, build the entire project:
 
 1.  **Clone the repository and submodules:**
+
     ```bash
     git submodule update --init --recursive
     ```
 
 2.  **Build everything:**
     This command will build the hypervisor, evaluation binaries, U-Boot, and OpenSBI.
+
     ```bash
     cargo make build-all
     ```
-    *Note: The first run may take some time as Nix downloads dependencies.*
+
+    _Note: The first run may take some time as Nix downloads dependencies._
 
 3.  **Verify Binaries:**
     Check that the following key binaries were generated:
@@ -44,6 +49,7 @@ To verify that the environment is set up correctly, build the entire project:
 ### Using Pre-built Binaries (Optional)
 
 If you wish to skip the build process, we provide pre-built binaries in the `binaries/` directory:
+
 - `binaries/hikami.elf`: The core hypervisor.
 - `binaries/bootloader_secboot_ddr5.bin`: The signed bootloader (OpenSBI + U-Boot).
 - `binaries/megrez/*.eval`: Evaluation binaries for performance measurement.
@@ -58,10 +64,12 @@ This experiment verifies the resource efficiency of the hypervisor as described 
 
 1.  **Source Lines of Code (SLoC):**
     Run `tokei` on the hypervisor components:
+
     ```bash
     tokei hikami hikami_zbs
     ```
-    *Note: Table 5 reports ~7,000 lines of Rust code total (Core Library + Hypervisor Binary + Zbs Module).*
+
+    _Note: Table 5 reports ~7,000 lines of Rust code total (Core Library + Hypervisor Binary + Zbs Module)._
 
 2.  **Binary Size and Memory Footprint:**
     Use `readelf` to inspect the hypervisor binary (either your built one or the pre-built one):
@@ -75,14 +83,16 @@ This experiment verifies the resource efficiency of the hypervisor as described 
 This experiment reproduces the performance results on the **Milk-V Megrez** hardware.
 
 1.  **Flash the SD Card:**
-    Download a base Megrez image, flash it to an SD card, and then install the artifacts. 
+    Download a base Megrez image, flash it to an SD card, and then install the artifacts.
 
     **Option A: Automated Install (After build)**
+
     ```bash
     DEVICE=/dev/sdX cargo make install  # Replace /dev/sdX with your SD card device
     ```
 
     **Option B: Manual Install (Using pre-built binaries)**
+
     ```bash
     sudo mount /dev/sdX1 /mnt
     sudo cp binaries/bootloader_secboot_ddr5.bin /mnt/
@@ -99,6 +109,7 @@ This experiment reproduces the performance results on the **Milk-V Megrez** hard
 3.  **Switching Evaluation Binaries:**
     The hypervisor embeds the guest binary at compile-time. To switch between different evaluation binaries (e.g., for different experiments), you must modify `hikami/src/target_board/megrez.rs` and rebuild.
     Example of switching to a specific binary:
+
     ```rust
     // In hikami/src/target_board/megrez.rs
     pub static GUEST_KERNEL: [u8; include_bytes!("../../guest_image/megrez/emulation_eval").len()] =
@@ -123,6 +134,7 @@ This experiment reproduces the performance results on the **Milk-V Megrez** hard
 This experiment verifies the **Ozora** auto-generation framework.
 
 1.  **Generate Code for Zbs Extension:**
+
     ```bash
     cd ozora
     nix develop . --command cargo r riscv_insts_zbs.sail target/zbs.rs --ext-name Zbs
@@ -134,20 +146,26 @@ This experiment verifies the **Ozora** auto-generation framework.
     # Check emulation logic
     diff -u ../hikami_zbs/src/lib.rs target/zbs.rs
     ```
-    *Note: Minor formatting differences may exist; use `rustfmt` on both files for a cleaner comparison.*
+    _Note: Minor formatting differences may exist; use `rustfmt` on both files for a cleaner comparison._
 
 ### Experiment 5: QEMU Evaluation (Partial Reproduction)
 
 If physical hardware (Milk-V Megrez) is not available, you can still verify the emulation logic and the hypervisor's core mechanisms using QEMU.
 
-1.  **Run Emulation Overhead Benchmark on QEMU:**
+1.  **Build Hikami for QEMU:**
+    ```bash
+    cargo make build-hikami-qemu
+    ```
+
+2.  **Run Emulation Overhead Benchmark on QEMU:**
     ```bash
     cd evaluation/emulation_overhead
     nix develop .. --command cargo make qemu
     ```
     This will run the bare-metal evaluation binary on QEMU's `virt` machine.
+    *Note: The hypervisor binary used here is the one built in step 1.*
 
-2.  **Verify Tracing (Optional):**
+3.  **Verify Tracing (Optional):**
     If you have a QEMU build with TCG plugin support, you can generate a trace log:
     ```bash
     nix develop .. --command cargo make qemu_log
@@ -158,13 +176,13 @@ If physical hardware (Milk-V Megrez) is not available, you can still verify the 
 
 ## 3. Claims Supported by the Artifact
 
-| Claim | Evidence | Paper Reference |
-| :--- | :--- | :--- |
-| **Lightweight Implementation** | SLoC count (~7k lines total) and binary size (< 100 KiB) | Section 4.2, Table 5 |
-| **Sub-microsecond Interrupt Latency** | Direct measurement on Megrez hardware (~1.0 $\mu$s) | Section 4.3.2 |
-| **Near-native Performance** | CoreMark results showing 99.8% of native speed | Section 4.5, Table 7 |
+| Claim                                       | Evidence                                                           | Paper Reference      |
+| :------------------------------------------ | :----------------------------------------------------------------- | :------------------- |
+| **Lightweight Implementation**              | SLoC count (~7k lines total) and binary size (< 100 KiB)           | Section 4.2, Table 5 |
+| **Sub-microsecond Interrupt Latency**       | Direct measurement on Megrez hardware (~1.0 $\mu$s)                | Section 4.3.2        |
+| **Near-native Performance**                 | CoreMark results showing 99.8% of native speed                     | Section 4.5, Table 7 |
 | **Outperforms QEMU in Realistic Workloads** | Faster execution when emulated instructions account for $\le$ 0.1% | Section 4.5, Table 8 |
-| **Reliable Code Generation** | Sail-to-Rust conversion using Ozora (81/109 lines auto-generated) | Section 4.6 |
+| **Reliable Code Generation**                | Sail-to-Rust conversion using Ozora (81/109 lines auto-generated)  | Section 4.6          |
 
 ---
 

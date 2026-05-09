@@ -28,9 +28,15 @@ script = [
 ]
 
 [tasks.build-hikami]
-description = "Build the Hikami hypervisor"
+description = "Build the Hikami hypervisor for Megrez"
 dependencies = ["link-guest-images"]
 script = ["nix develop ./hikami --command cargo make build-hikami-internal"]
+
+[tasks.build-hikami-qemu]
+description = "Build the Hikami hypervisor for QEMU"
+dependencies = ["link-guest-images"]
+script = ["nix develop ./hikami --command cargo build --release --features qemu,identity_map"]
+cwd = "hikami"
 
 [tasks.build-hikami-internal]
 description = "Internal task to run cargo build for hikami"
