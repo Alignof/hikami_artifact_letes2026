@@ -49,6 +49,7 @@
             rust_toolchain_none
             rust_toolchain_musl
             cargo-make
+            tokei
 
             # musl toolchain
             riscv64MuslPkgs.pkgsStatic.stdenv.cc
