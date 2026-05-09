@@ -41,6 +41,13 @@ To verify that the environment is set up correctly, build the entire project:
     - `hikami/target/riscv64imac-unknown-none-elf/release/hikami`
     - `rockos-opensbi/sign/preload/bootloader_secboot_ddr5.bin`
 
+### Using Pre-built Binaries (Optional)
+
+If you wish to skip the build process, we provide pre-built binaries in the `binaries/` directory:
+- `binaries/hikami.elf`: The core hypervisor.
+- `binaries/bootloader_secboot_ddr5.bin`: The signed bootloader (OpenSBI + U-Boot).
+- `binaries/megrez/*.eval`: Evaluation binaries for performance measurement.
+
 ---
 
 ## 2. Step-by-Step Instructions
@@ -57,9 +64,9 @@ This experiment verifies the resource efficiency of the hypervisor as described 
     *Note: Table 5 reports ~7,000 lines of Rust code total (Core Library + Hypervisor Binary + Zbs Module).*
 
 2.  **Binary Size and Memory Footprint:**
-    Use `readelf` to inspect the built hypervisor binary:
+    Use `readelf` to inspect the hypervisor binary (either your built one or the pre-built one):
     ```bash
-    readelf -S hikami/target/riscv64imac-unknown-none-elf/release/hikami
+    readelf -S binaries/hikami.elf
     ```
     Observe the size of the `.text` section. As mentioned in Section 4.2, the `.text` section occupies approximately 84 KiB.
 
@@ -68,9 +75,19 @@ This experiment verifies the resource efficiency of the hypervisor as described 
 This experiment reproduces the performance results on the **Milk-V Megrez** hardware.
 
 1.  **Flash the SD Card:**
-    Download a base Megrez image, flash it to an SD card, and then install the artifacts:
+    Download a base Megrez image, flash it to an SD card, and then install the artifacts. 
+
+    **Option A: Automated Install (After build)**
     ```bash
     DEVICE=/dev/sdX cargo make install  # Replace /dev/sdX with your SD card device
+    ```
+
+    **Option B: Manual Install (Using pre-built binaries)**
+    ```bash
+    sudo mount /dev/sdX1 /mnt
+    sudo cp binaries/bootloader_secboot_ddr5.bin /mnt/
+    sudo cp binaries/hikami.elf /mnt/hikami.elf
+    sudo umount /mnt
     ```
 
 2.  **Run the Benchmark:**
