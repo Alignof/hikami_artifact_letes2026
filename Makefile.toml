@@ -1,3 +1,6 @@
+[config]
+skip_core_tasks = true
+
 [tasks.default]
 alias = "build-all"
 
@@ -9,6 +12,8 @@ dependencies = ["build-hikami", "build-bootloaders"]
 description = "Build emulation evaluation binaries for both qemu and megrez"
 script = [
   "nix develop ./evaluation --command bash -c 'cd evaluation/emulation_overhead && cargo make build_megrez && cargo make build_qemu'",
+  "nix develop ./evaluation --command bash -c 'cd evaluation/timer_interrupt_overhead && cargo make build'",
+  "nix develop ./evaluation --command bash -c 'cd evaluation/external_interrupt_overhead && cargo make build'",
 ]
 
 [tasks.link-guest-images]
@@ -19,12 +24,24 @@ script = [
   "mkdir -p hikami/guest_image/qemu",
   "ln -sf ../../../evaluation/emulation_overhead/target/riscv64imac-unknown-none-elf/release/emulation_overhead hikami/guest_image/megrez/emulation_eval",
   "ln -sf ../../../evaluation/emulation_overhead/target/riscv64imac-unknown-none-elf/release/emulation_overhead hikami/guest_image/qemu/emulation_eval",
+  "ln -sf ../../../evaluation/timer_interrupt_overhead/target/riscv64imac-unknown-none-elf/release/timer_interrupt_overhead hikami/guest_image/megrez/timer_eval",
+  "ln -sf ../../../evaluation/timer_interrupt_overhead/target/riscv64imac-unknown-none-elf/release/timer_interrupt_overhead hikami/guest_image/qemu/timer_eval",
+  "ln -sf ../../../evaluation/external_interrupt_overhead/target/riscv64imac-unknown-none-elf/release/external_interrupt_overhead hikami/guest_image/megrez/external_eval",
+  "ln -sf ../../../evaluation/external_interrupt_overhead/target/riscv64imac-unknown-none-elf/release/external_interrupt_overhead hikami/guest_image/qemu/external_eval",
 ]
 
 [tasks.build-hikami]
-description = "Build the Hikami hypervisor"
+description = "Build the Hikami hypervisor for Megrez"
 dependencies = ["link-guest-images"]
 script = ["nix develop ./hikami --command cargo make build-hikami-internal"]
+
+[tasks.build-hikami-qemu]
+description = "Build the Hikami hypervisor for QEMU"
+dependencies = ["link-guest-images"]
+script = [
+  "nix develop ./hikami --command cargo build --release --features qemu,identity_map",
+]
+cwd = "hikami"
 
 [tasks.build-hikami-internal]
 description = "Internal task to run cargo build for hikami"
@@ -65,8 +82,14 @@ script = [
 description = "Clean all built binaries"
 script = [
   "rm -rf evaluation/emulation_overhead/target",
+  "rm -rf evaluation/timer_interrupt_overhead/target",
+  "rm -rf evaluation/external_interrupt_overhead/target",
   "rm -f hikami/guest_image/megrez/emulation_eval",
   "rm -f hikami/guest_image/qemu/emulation_eval",
+  "rm -f hikami/guest_image/megrez/timer_eval",
+  "rm -f hikami/guest_image/qemu/timer_eval",
+  "rm -f hikami/guest_image/megrez/external_eval",
+  "rm -f hikami/guest_image/qemu/external_eval",
   "rm -f hikami/guest_image/initrd",
   "cd hikami && cargo clean",
   "cd rockos-u-boot && make clean",

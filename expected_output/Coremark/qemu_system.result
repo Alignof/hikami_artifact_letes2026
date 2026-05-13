@@ -1,0 +1,36 @@
+2K performance run parameters for coremark.
+CoreMark Size    : 666
+Total ticks      : 12180
+Total time (secs): 12.180000
+Iterations/Sec   : 903.119869
+Iterations       : 11000
+Compiler version : GCC14.2.0
+Compiler flags   : -O2
+Memory location  : Please put data memory location here
+                        (e.g. code in flash, data on heap etc)
+seedcrc          : 0xe9f5
+[0]crclist       : 0xe714
+[0]crcmatrix     : 0x1fd7
+[0]crcstate      : 0x8e3a
+[0]crcfinal      : 0x33ff
+Correct operation validated. See README.md for run and reporting rules.
+CoreMark 1.0 : 903.119869 / GCC14.2.0 -O2    / Heap
+---
+qemu-system-riscv64 \
+  -machine virt \
+  -cpu rv64 \
+  -m 2G \
+  -smp 1 \
+  -nographic \
+  -bios default \
+  -kernel dqib_riscv64-virt/kernel \
+  -initrd dqib_riscv64-virt/initrd \
+  -append "root=LABEL=rootfs console=ttyS0" \
+  -drive file=./dqib_riscv64-virt/image.qcow2,format=qcow2,if=virtio \
+  -netdev user,id=net0 -device virtio-net-device,netdev=net0 \
+  -device virtio-9p-device,fsdev=fs1,mount_tag=host_share \
+  -fsdev local,security_model=none,id=fs1,path=/home/debian/riscv-coremark/
+  
+(in guest)
+mkdir -p /mnt/host
+mount -t 9p -o trans=virtio,version=9p2000.L host_share /mnt/host

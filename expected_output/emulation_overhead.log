@@ -1,0 +1,207 @@
+port is        : /dev/ttyUSB0
+flowcontrol    : none
+baudrate is    : 115200
+parity is      : none
+databits are   : 8
+stopbits are   : 1
+txdelay is     : 0 ns
+escape is      : C-a
+local echo is  : no
+noinit is      : no
+noreset is     : no
+hangup is      : no
+nolock is      : no
+send_cmd is    : /nix/store/8njwwr97l5mv0mlax9xjavfymkd0mcx8-lrzsz-0.12.20/bin/sz -vv
+receive_cmd is : /nix/store/8njwwr97l5mv0mlax9xjavfymkd0mcx8-lrzsz-0.12.20/bin/rz -vv -E
+imap is        :
+omap is        :
+emap is        : crcrlf,delbs,
+logfile is     : none
+initstring     : none
+exit_after is  : not set
+exit is        : no
+minimal cmds is: no
+
+Type [C-a] [C-h] to see available commands
+Terminal ready
+pll config ok
+pll config ok
+die_num:0,die_ordinal:0
+Firmware version:1.4;disable ECC
+PHY0 training process:100%
+PHY1 training process:100%
+DDR type:LPDDR5;Size:16GB,Data Rate:6400MT/s
+DDR self test OK
+
+OpenSBI v1.5
+   ____                    _____ ____ _____
+  / __ \                  / ____|  _ \_   _|
+ | |  | |_ __   ___ _ __ | (___ | |_) || |
+ | |  | | '_ \ / _ \ '_ \ \___ \|  _ < | |
+ | |__| | |_) |  __/ | | |____) | |_) || |_
+  \____/| .__/ \___|_| |_|_____/|____/_____|
+        | |
+        |_|
+
+Platform Name             : Milk-V Megrez
+Platform Features         : medeleg
+Platform HART Count       : 4
+Platform IPI Device       : aclint-mswi
+Platform Timer Device     : aclint-mtimer @ 1000000Hz
+Platform Console Device   : uart8250
+Platform HSM Device       : ---
+Platform PMU Device       : ---
+Platform Reboot Device    : eswin_eic770x_reset
+Platform Shutdown Device  : eswin_eic770x_reset
+Platform Suspend Device   : ---
+Platform CPPC Device      : ---
+Firmware Base             : 0x80000000
+Firmware Size             : 357 KB
+Firmware RW Offset        : 0x40000
+Firmware RW Size          : 101 KB
+Firmware Heap Offset      : 0x4f000
+Firmware Heap Size        : 41 KB (total), 2 KB (reserved), 11 KB (used), 27 KB (free)
+Firmware Scratch Size     : 4096 B (total), 416 B (used), 3680 B (free)
+Runtime SBI Version       : 2.0
+
+Domain0 Name              : root
+Domain0 Boot HART         : 2
+Domain0 HARTs             : 0*,1*,2*,3*
+Domain0 Region00          : 0x0000000002000000-0x000000000200ffff M: (I,R,W) S/U: ()
+Domain0 Region01          : 0x0000000080000000-0x000000008007ffff M: (R,W) S/U: ()
+Domain0 Region02          : 0x000000c000000000-0x000000d000000000 M: () S/U: (R,W)
+Domain0 Region03          : 0x0000001000000000-0x0000008000000000 M: () S/U: ()
+Domain0 Region04          : 0x0000000000000000-0xffffffffffffffff M: () S/U: (R,W,X)
+Domain0 Next Address      : 0x0000000080200000
+Domain0 Next Arg1         : 0x00000000f8000000
+Domain0 Next Mode         : S-mode
+Domain0 SysReset          : yes
+Domain0 SysSuspend        : yes
+
+Boot HART ID              : 2
+Boot HART Domain          : root
+Boot HART Priv Version    : v1.11
+Boot HART Base ISA        : rv64imafdchx
+Boot HART ISA Extensions  : sscofpmf,zihpm,sdtrig
+Boot HART PMP Count       : 8
+Boot HART PMP Granularity : 12 bits
+Boot HART PMP Address Bits: 39
+Boot HART MHPM Info       : 4 (0x00000078)
+Boot HART Debug Triggers  : 4 triggers
+Boot HART MIDELEG         : 0x0000000000002666
+Boot HART MEDELEG         : 0x0000000000f0b509
+
+Hardware Feature[7C1]: 0x4000
+Hardware Feature[7C2]: 0x80
+Hardware Feature[7C3]: 0x104095c1be241
+Hardware Feature[7C4]: 0x1d3ff
+
+
+U-Boot 2024.01-g1f342b1a81 (Jan 01 1980 - 00:00:00 +0000)
+
+CPU:   rv64imafdc_zba_zbb
+Model: Milk-V Megrez
+DRAM:  16 GiB
+Core:  143 devices, 31 uclasses, devicetree: separate
+Warning: Device tree includes old 'u-boot,dm-' tags: please fix by 2023.07!
+MMC:   sdhci@50450000: 0, sd@50460000: 1
+Loading Environment from SPIFlash... SF: Detected w25q64dw with page size 256 Bytes, erase size 4 KiB, total 8 MiB
+*** Warning - bad CRC, using default environment
+
+[display_init]Eswin UBOOT DRM driver version: v1.0.1
+In:    serial,usbkbd
+Out:   vidconsole,serial
+Err:   vidconsole,serial
+Success to initialize SPI flash at spi@51800000
+Bootspi flash write protection enabled
+Get board info from flash
+ERROR: There is no valid hardware board information!!!
+Cpu volatge no need boost at 1.6 Ghz!
+Card did not respond to voltage select! : -110
+Low power features will not be supported!
+Net:
+Warning: ethernet@50400000 (eth0) using random MAC address - fa:7e:c3:4a:c7:a6
+eth0: ethernet@50400000
+Working FDT set to ed4d8b90
+starting USB...
+Bus usb1@50490000: Register 2000140 NbrPorts 2
+Starting the controller
+USB XHCI 1.10
+scanning bus usb1@50490000 for devices... 4 USB Device(s) found
+       scanning usb for storage devices... 1 Storage Device(s) found
+No SATA device found!
+Autoboot in 5 seconds
+boot_params = 0x0000000000000000
+DRAM bank   = 0x0000000000000000
+-> start    = 0x0000000080000000
+-> size     = 0x0000000400000000
+flashstart  = 0x0000000000000000
+flashsize   = 0x0000000000000000
+flashoffset = 0x0000000000000000
+baudrate    = 115200 bps
+relocaddr   = 0x00000000fd563000
+reloc off   = 0x000000007d363000
+Build       = 64-bit
+current eth = ethernet@50400000
+ethaddr     = fa:7e:c3:4a:c7:a6
+IP addr     = <NULL>
+fdt_blob    = 0x00000000ed4d8b90
+new_fdt     = 0x00000000ed4d8b90
+fdt_size    = 0x000000000000a240
+Video       = display-subsystem active
+FB base     = 0x00000000fd800000
+FB size     = 1920x1080x32
+lmb_dump_all:
+ memory.cnt = 0x1 / max = 0x10
+ memory[0]      [0x80000000-0x47fffffff], 0x400000000 bytes flags: 0
+ reserved.cnt = 0x5 / max = 0x10
+ reserved[0]    [0x80000000-0x8007ffff], 0x00080000 bytes flags: 4
+ reserved[1]    [0xdfff0000-0xe0ffffff], 0x01010000 bytes flags: 4
+ reserved[2]    [0xe84d7000-0xffffffff], 0x17b29000 bytes flags: 0
+ reserved[3]    [0x47fff4000-0x47fffffff], 0x0000c000 bytes flags: 0
+ reserved[4]    [0x1000000000-0x10003fffff], 0x00400000 bytes flags: 4
+devicetree  = separate
+bootcmd=bdinfo; print bootcmd; load usb 0 0x100000000 /hikami.elf; bootelf 0x100000000
+65080360 bytes read in 1549 ms (40.1 MiB/s)
+## Starting application at 0x83000000 ...
+welcome to hikami
+hart_id: 2, dtb address: 0xed4d8b90, initrd address: 0xd00f8000
+map memory mapped device region Mapping 0x80000000 bytes to GPA [0x0 - 0x80000000]
+[Device Unmap] interrupt-controller@c000000: 0xc002000..0x10000000
+[Device Unmap] mswi@02000000: 0x2000000..0x2004000
+[Device Unmap] mtimer@02004000: 0x200bff8..0x200c000
+guest memory region (hart 2, guest id 0): Mapping 0x80000000 bytes to GPA [0x100000000 - 0x180000000]
+initrd (guest id:0): Mapping 0x3baf0f3 bytes to GPA [0x17c450000 - 0x17ffff0f3]
+Guest start (guest hart: 0, device tree: 0x80000000)
+hikami emulation overhead evaluation
+current time: 3297
+current time: 5033
+current time: 6769
+current time: 8505
+current time: 10241
+--- Time Benchmark  Start ---
+[Latency Test] Measuring cycles per instruction...
+Result: Min=1222 cycles, Max=7946 cycles
+[Throughput Test] Running 1,000,000 iterations...
+Elapsed Time (mtime ticks): 949763 us
+--- Time Benchmark (mtrap disabled) Start ---
+[Latency Test] Measuring cycles per instruction...
+Result: Min=596 cycles, Max=665 cycles
+[Throughput Test] Running 1,000,000 iterations...
+Elapsed Time (mtime ticks): 463421 us
+--- Time Benchmark  Start ---
+[Latency Test] Measuring cycles per instruction...
+Result: Min=1224 cycles, Max=2719 cycles
+[Throughput Test] Running 1,000,000 iterations...
+Elapsed Time (mtime ticks): 949797 us
+--- Time Benchmark (mtrap disabled) Start ---
+[Latency Test] Measuring cycles per instruction...
+Result: Min=601 cycles, Max=643 cycles
+[Throughput Test] Running 1,000,000 iterations...
+Elapsed Time (mtime ticks): 463326 us
+--- Mixed Ratio 1 Million Instructions Benchmark (10-run average) ---
+1% Ratio Average: 4907 ticks (us)
+0.1% Ratio Average: 885 ticks (us)
+0.01% Ratio Average: 358 ticks (us)
+0% Ratio Average: 357 ticks (us)
+End...
