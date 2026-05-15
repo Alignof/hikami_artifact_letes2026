@@ -60,6 +60,7 @@
             gnumake
             cmake
             pkg-config
+            qemu
 
             openocd
           ];
