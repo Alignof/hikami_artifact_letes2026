@@ -21,6 +21,7 @@ This artifact supports the paper: **"Hikami: A Lightweight Hypervisor for Emulat
 - **Linux Host**: For building the artifacts and flashing the SD card.
 - **tokei**: For SLoC measurement (can be installed via `cargo install tokei` or your package manager).
 - **binutils**: `readelf` is required for binary analysis.
+- **QEMU**: `qemu-system-riscv64` (version 9.0+) is required for Experiment 5. **Note: QEMU is automatically provided by the Nix devShells in this project.**
 
 ### Basic Test: Building the Hypervisor
 
@@ -148,26 +149,38 @@ This experiment verifies the **Ozora** auto-generation framework.
     ```
     _Note: Minor formatting differences may exist; use `rustfmt` on both files for a cleaner comparison._
 
-### Experiment 5: QEMU Evaluation (Partial Reproduction)
+### Experiment 5: QEMU Evaluation (Emulation Overhead)
 
-If physical hardware (Milk-V Megrez) is not available, you can still verify the emulation logic and the hypervisor's core mechanisms using QEMU.
+If physical hardware (Milk-V Megrez) is not available, you can still verify the emulation logic using QEMU. Note that QEMU execution results differ from physical hardware due to TCG (JIT) characteristics.
 
-1.  **Build Hikami for QEMU:**
-    ```bash
-    cargo make build-hikami-qemu
-    ```
+1.  **Binary Verification (Native Execution on QEMU):**
+    This step runs the evaluation binary directly on QEMU's S-mode. Since QEMU's default `rv64` CPU supports the Zbs extension, this demonstrates "Native" performance (comparable to "QEMU (Default)" in Table 8).
 
-2.  **Run Emulation Overhead Benchmark on QEMU:**
     ```bash
     cd evaluation/emulation_overhead
     nix develop .. --command cargo make qemu
     ```
-    This will run the bare-metal evaluation binary on QEMU's `virt` machine.
-    *Note: The hypervisor binary used here is the one built in step 1.*
+
+2.  **Hypervisor Evaluation (Emulation via Hikami on QEMU):**
+    This step runs the hypervisor (Hikami) on QEMU, with the evaluation guest embedded. To trigger Hikami's emulation logic, we disable the native Zbs extension in QEMU (`zbs=false`).
+
+    ```bash
+    # Ensure the hypervisor is built for QEMU with the evaluation guest and contains the emulation evaluatoin binary
+    cargo make build-hikami-qemu
+
+    # Run the hypervisor
+    cd hikami
+    nix develop . --command cargo r --release --features identity_map,qemu
+    ```
+
+    **Warning:** Running the full emulation benchmark on QEMU takes significantly longer than on physical hardware. Expect the benchmark to run for **at least 2 minutes** before completion.
+
+    _Note: The 0% ratio should now show baseline performance without the MMIO overhead seen in previous versions, as redundant hardware timer resets are disabled for QEMU targets._
 
 3.  **Verify Tracing (Optional):**
-    If you have a QEMU build with TCG plugin support, you can generate a trace log:
+    If you have a QEMU build with TCG plugin support, you can generate a trace log for the native execution:
     ```bash
+    cd evaluation/emulation_overhead
     nix develop .. --command cargo make qemu_log
     ```
     This generates `qemu.log`, which can be analyzed using `cargo make inspect`.
