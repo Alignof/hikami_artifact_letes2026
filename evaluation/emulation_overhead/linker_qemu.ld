@@ -5,7 +5,7 @@ _stack_size = 0x400000;
 
 SECTIONS
 {
-    . = 0x84000000;
+    . = 0x100000000;
     .text : {
         *(.text.entry)
         *(.text .text.*)

@@ -354,7 +354,9 @@ fn mixed_ratio_benchmark() {
         asm!("begin_000pct:");
     }
     for _ in 0..10 {
-        reset_counter();
+        if !cfg!(feature = "qemu") {
+            reset_counter();
+        }
         let start = get_current_time();
         // 1000 * 10 + 1000 * 10 * 99 = 1000000
         execute_10_units!("add t2, t3, t4", "add t2, t3, t4", 1000);
