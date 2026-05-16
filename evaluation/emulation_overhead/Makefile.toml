@@ -97,12 +97,24 @@ riscv64-unknown-linux-musl-readelf -s ${CARGO_MAKE_CRATE_CUSTOM_TRIPLE_TARGET_DI
 [tasks.libtrace]
 description = "Build QEMU TCG plugin"
 script = ['''
-   # If QEMU_INCLUDE_PATH is not set, try to find it or use a default
+   # If QEMU_INCLUDE_PATH is not set, try to find it in the nix environment
    if [ -z "${QEMU_INCLUDE_PATH}" ]; then
-     # Check common locations or use pkg-config if available
+     QEMU_BIN=$(command -v qemu-system-riscv64)
+     if [ -n "${QEMU_BIN}" ]; then
+       # Try to infer include path from binary path (Nix store)
+       QEMU_PREFIX=$(dirname $(dirname ${QEMU_BIN}))
+       if [ -f "${QEMU_PREFIX}/include/qemu-plugin.h" ]; then
+         QEMU_INCLUDE_PATH="${QEMU_PREFIX}/include"
+       fi
+     fi
+   fi
+
+   if [ -z "${QEMU_INCLUDE_PATH}" ]; then
      QEMU_INCLUDE_PATH="/usr/local/include"
      echo "QEMU_INCLUDE_PATH not set, using default: ${QEMU_INCLUDE_PATH}"
    fi
+
+   echo "Using QEMU_INCLUDE_PATH: ${QEMU_INCLUDE_PATH}"
 
    gcc -shared -fPIC -I${QEMU_INCLUDE_PATH} \
     $(pkg-config --cflags --libs glib-2.0) \
