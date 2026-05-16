@@ -1,5 +1,7 @@
 # Artifact Evaluation: Hikami (LCTES 2026)
 
+[![DOI](https://zenodo.org/badge/1229977663.svg)](https://doi.org/10.5281/zenodo.20226187)
+
 This artifact supports the paper: **"Hikami: A Lightweight Hypervisor for Emulating RISC-V Extension Semantics with Sail-Driven Auto-Generation"** (Paper #45).
 
 ## 1. Getting Started Guide
